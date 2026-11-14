@@ -1,4 +1,4 @@
-# Project Name
+# Flydigi Vader 5S Driver for Bazzite
 
 ![Status: Active Development](https://shields.io)
 
