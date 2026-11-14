@@ -6,7 +6,7 @@
 > **Project Status:** This project is currently in active development. Core features are still being implemented, and documentation or APIs may change before the first stable release.
 
 ## Overview
-A brief one- or two-sentence summary of what this project will do once completed.
+A driver for the Flydigi Vader 5S. At completion, all buttons (including the back paddles) and all lights should be functional.
 
 ## Roadmap
 - [x] Initial repository setup
