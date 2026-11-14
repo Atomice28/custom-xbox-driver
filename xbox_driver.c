@@ -135,14 +135,18 @@ int main() {
     libusb_control_transfer(devh, 0xC1, 0x01, 0x0000, 0x00, ctrl_buf, 0x08, 100);
     libusb_control_transfer(devh, 0xC0, 0x01, 0x0000, 0x00, ctrl_buf, 0x04, 100);
 
-    // 2. Send GIP Power-On and Flydigi V2 Acquire Packet (unlocks M1-M4, C, Z, LM, RM)
+    // 2. Send GIP Power-On, GIP LED On, XInput LED Wake, and Flydigi V2 Acquire
     uint8_t gip_power_on[] = {0x05, 0x20, 0x00, 0x01, 0x00};
+    uint8_t gip_led_on[]   = {0x0a, 0x20, 0x00, 0x03, 0x00, 0x01, 0x14}; // Turns on Xbox GIP LED
+    uint8_t xinput_led[]   = {0x01, 0x03, 0x01};                         // Turns on XInput Player 1 LED
     uint8_t flydigi_acquire[32] = {
         0x5A, 0xA5, 0x1C, 0x17, 0x01, 'S', 'D', 'L', 0x00
     };
     int transferred = 0;
     for (int i = 0; i < num_out; i++) {
         libusb_interrupt_transfer(devh, ep_out_list[i], gip_power_on, sizeof(gip_power_on), &transferred, 100);
+        libusb_interrupt_transfer(devh, ep_out_list[i], gip_led_on, sizeof(gip_led_on), &transferred, 100);
+        libusb_interrupt_transfer(devh, ep_out_list[i], xinput_led, sizeof(xinput_led), &transferred, 100);
         libusb_interrupt_transfer(devh, ep_out_list[i], flydigi_acquire, sizeof(flydigi_acquire), &transferred, 100);
     }
 
@@ -156,6 +160,20 @@ int main() {
         for (int i = 0; i < num_in; i++) {
             int r = libusb_interrupt_transfer(devh, ep_in_list[i], buf, sizeof(buf), &transferred, 4);
             if (r != 0 || transferred == 0) continue;
+
+            printf("Received Data on EP 0x%02x! Size: %d bytes (Header: 0x%02x)\n", ep_in_list[i], transferred, buf[0]);
+
+            // If the controller sends an Xbox GIP announce (0x02) or requests an ACK (bit 0x10), reply and wake it
+            if ((buf[1] & 0x10) && num_out > 0) {
+                uint8_t ack_pkt[] = {
+                    0x01, 0x20, buf[2], 0x09, 0x00, buf[0], 0x20, 0x02,
+                    0x00, 0x00, 0x00, 0x00, 0x00
+                };
+                int ack_sent = 0;
+                libusb_interrupt_transfer(devh, ep_out_list[0], ack_pkt, sizeof(ack_pkt), &ack_sent, 100);
+                libusb_interrupt_transfer(devh, ep_out_list[0], gip_power_on, sizeof(gip_power_on), &ack_sent, 100);
+                libusb_interrupt_transfer(devh, ep_out_list[0], gip_led_on, sizeof(gip_led_on), &ack_sent, 100);
+            }
 
             // Locate Flydigi V2 32-byte Vendor Packet (Header: 5A A5 EF)
             int offset = -1;
