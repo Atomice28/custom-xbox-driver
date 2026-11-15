@@ -1,10 +1,12 @@
 # Flydigi Vader 5S userspace driver for Linux (Bazzite)
 
-A small userspace driver that reads the Flydigi Vader 5S (USB `37d7:2801`, Xbox-licensed, GIP protocol)
+Gemini's Argon 4, along with Claude's Sonnet 5.5, created a small userspace driver that reads the Flydigi Vader 5S (USB `37d7:2801`, Xbox-licensed, GIP protocol)
 over libusb and exposes it to Steam and games as a virtual gamepad through `uinput`, including rumble.
 
-> **Status: experimental.** Built from public protocol notes and unit-tested with captured and synthetic
-> packets. Verification on real hardware is in progress, so expect rough edges.
+This code was made by them with the help of me.
+
+> **Status: Experimentally Goddamn Volatile.** Built from public protocol notes and unit-tested with captured and synthetic
+> packets. Verification on real hardware is in progress, so expect rough edges. sowwy
 
 ## What's new in v5
 
@@ -96,6 +98,7 @@ SUBSYSTEM=="input", ATTRS{name}=="Flydigi Vader 5S (userspace driver)", TAG+="ua
 - Paddles, C/Z and Share are not mapped by default; their report layout is unconfirmed for this pad.
 - Rumble only drives the main motors and, with `-t`, a mirrored trigger level. Linux's rumble API has no separate
   trigger channel.
+- My patience is revealing itself to be a now-known limitation.  
 - Not yet verified end-to-end on hardware.
 
 ## References
