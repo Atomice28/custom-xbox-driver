@@ -60,8 +60,8 @@ If you want to use this driver on your own Bazzite machine, follow these steps. 
 Open **Konsole** on Bazzite and download this repo:
 
 ```bash
-git clone [https://github.com/Atomice28/custom-xbox-driver.git](https://github.com/Atomice28/custom-xbox-driver.git)
-cd custom-xbox-driver
+git clone [https://github.com/Atomice28/flydigi-vader5s-bazzite.git](https://github.com/Atomice28/flydigi-vader5s-bazzite.git)
+cd flydigi-vader5s-bazzite
 ```
 
 ### 2. Compile the C driver (inside Distrobox)
@@ -72,7 +72,7 @@ You can execute this in one fell swoop without ever actually stepping fully insi
 ```bash
 distrobox enter <your-container-name> -- gcc -O2 -Wall -Wextra -o xbox_driver xbox_driver.c -lusb-1.0
 ```
-*(DON'T COPY YOUR-CONTAINER-NAME. REPLACE IT WITH YOUR OWN CONTAINER'S NAME, LIKE UBUNTU-DRIVER etc. DON'T FORGET. If you want to, you can still type distrobox enter, run the gcc command manually, and then type exit. If your terminal window completely vanishes upon exiting, don't panic—just reopen Konsole and run cd ~/custom-xbox-driver again.)*
+*(DON'T COPY YOUR-CONTAINER-NAME. REPLACE IT WITH YOUR OWN CONTAINER'S NAME, LIKE UBUNTU-DRIVER etc. DON'T FORGET. If you want to, you can still type distrobox enter, run the gcc command manually, and then type exit. If your terminal window completely vanishes upon exiting, don't panic—just reopen Konsole and run cd ~/flydigi-vader5s-bazzite again.)*
 
 ### 3. Install as an automatic background service (Recommended)
 Run the included installer script on the Bazzite host:
