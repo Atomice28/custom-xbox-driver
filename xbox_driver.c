@@ -514,6 +514,8 @@ static int handle_gip(const uint8_t *d, int n)
         ev_abs(&b, ABS_Y,      ~le16s(d + 12));
         ev_abs(&b, ABS_RX,     le16s(d + 14));
         ev_abs(&b, ABS_RY,     ~le16s(d + 16));
+        if (n > 18)
+            ev_key(&b, KEY_RECORD, d[18] & 0x01);
         for (int i = 0; i < g.num_maps; i++)        /* user-defined extra buttons (-m) */
             ev_key(&b, g.maps[i].code, g.maps[i].offset < n && (d[g.maps[i].offset] & g.maps[i].mask));
         ev_flush(&b);
@@ -805,7 +807,7 @@ static int uinput_open(void)
     UI_CALL(UI_SET_EVBIT, EV_KEY);
     static const int base_keys[] = {
         BTN_A, BTN_B, BTN_X, BTN_Y, BTN_TL, BTN_TR, BTN_SELECT, BTN_START, BTN_MODE,
-        BTN_THUMBL, BTN_THUMBR,
+        BTN_THUMBL, BTN_THUMBR, KEY_RECORD,
     };
     for (size_t i = 0; i < sizeof base_keys / sizeof base_keys[0]; i++)
         UI_CALL(UI_SET_KEYBIT, base_keys[i]);
