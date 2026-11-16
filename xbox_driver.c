@@ -311,11 +311,22 @@ static void gip_ack(uint8_t cmd, uint8_t opt, uint8_t seq, uint8_t plen)
 static void rumble_send(uint32_t strong, uint32_t weak)
 {
     if (g.gip_out) {
-        /* 09 00 seq 09 | 00 mask LT RT strong weak on off repeat ; strength 0..100 */
-        uint8_t trig = g.trigger_rumble ? (uint8_t)(((strong + weak) / 2u) * 100u / 65535u) : 0;
+        /* Quadratic (x^2) curve so light rumbles stay subtle and heavy hits punch hard */
+        uint8_t s_out = (uint8_t)(((uint64_t)strong * strong * 55ULL) / (65535ULL * 65535ULL));
+        uint8_t w_out = (uint8_t)(((uint64_t)weak   * weak   * 40ULL) / (65535ULL * 65535ULL));
+        if (strong > 1500u && s_out == 0) s_out = 1;
+        if (weak   > 1500u && w_out == 0) w_out = 1;
+
+        /* Only kick trigger motors on medium-to-heavy impacts (above ~30% strong rumble) */
+        uint8_t trig = 0;
+        if (g.trigger_rumble && strong > 20000u) {
+            uint64_t t_raw = strong - 20000u;
+            trig = (uint8_t)((t_raw * t_raw * 20ULL) / (45535ULL * 45535ULL));
+            if (trig == 0) trig = 1;
+        }
+
         uint8_t p[13] = { 0x09, 0x00, next_seq(), 0x09, 0x00, 0x0f, trig, trig,
-                          (uint8_t)(strong * 100u / 65535u), (uint8_t)(weak * 100u / 65535u),
-                          0xff, 0x00, 0xff };
+                          s_out, w_out, 0xff, 0x00, 0xff };
         usb_send(g.gip_out, p, sizeof p);
     } else if (g.x360_out) {
         uint8_t p[8] = { 0x00, 0x08, 0x00, (uint8_t)(strong >> 8), (uint8_t)(weak >> 8), 0, 0, 0 };
